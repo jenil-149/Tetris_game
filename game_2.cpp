@@ -2,57 +2,57 @@
 #include <vector>
 #include <chrono>
 #include <thread>
-#include <conio.h> // For _kbhit() and _getch()
-#include <windows.h> // For console manipulation
-#include <cstdlib> // For system()
+#include <conio.h> 
+#include <windows.h> 
+#include <cstdlib> 
 #include <ctime> // For random piece generation
 
 using namespace std;
 
-// Constants for the game board
+
 const int BOARD_WIDTH = 10;
 const int BOARD_HEIGHT = 20;
-const int BLOCK_SIZE = 2; // Visual size of each block in console
+const int BLOCK_SIZE = 2; 
 
-// Tetromino pieces - all possible shapes
+// Tetris piece - all possible shapes
 const vector<vector<vector<bool>>> TETROMINOES = {
-    // I-piece
+    // I
     {
         {0, 0, 0, 0},
         {1, 1, 1, 1},
         {0, 0, 0, 0},
         {0, 0, 0, 0}
     },
-    // O-piece
+    // O
     {
         {1, 1},
         {1, 1}
     },
-    // T-piece
+    // T
     {
         {0, 1, 0},
         {1, 1, 1},
         {0, 0, 0}
     },
-    // S-piece
+    // S
     {
         {0, 1, 1},
         {1, 1, 0},
         {0, 0, 0}
     },
-    // Z-piece
+    // Z
     {
         {1, 1, 0},
         {0, 1, 1},
         {0, 0, 0}
     },
-    // J-piece
+    // J
     {
         {1, 0, 0},
         {1, 1, 1},
         {0, 0, 0}
     },
-    // L-piece
+    // L
     {
         {0, 0, 1},
         {1, 1, 1},
@@ -60,7 +60,7 @@ const vector<vector<vector<bool>>> TETROMINOES = {
     }
 };
 
-// Colors for different pieces
+
 const vector<int> COLORS = {
     1,  // Blue (I)
     6,  // Yellow (O)
@@ -74,44 +74,44 @@ const vector<int> COLORS = {
 class Tetris {
 private:
     vector<vector<int>> board; // Game board (0 = empty, 1-7 = occupied by piece)
-    vector<vector<bool>> currentPiece; // Current falling piece
-    int currentX, currentY; // Position of current piece
+    vector<vector<bool>> currentPiece; 
+    int currentX, currentY; 
     int currentColor; // Color of current piece
     int pieceType; // Type of current piece (0-6)
     int score;
     int level;
     int linesCleared;
     bool gameOver;
-    int fallSpeed; // Milliseconds between automatic falls
+    int fallSpeed; 
     chrono::time_point<chrono::steady_clock> lastFall;
 
-    // Helper function to clear the console
+    // clear the console
     void clearScreen() {
         system("cls");
     }
 
-    // Helper function to set console cursor position
+    //  set console cursor position
     void setCursorPosition(int x, int y) {
         COORD coord = { static_cast<SHORT>(x), static_cast<SHORT>(y) };
         SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
     }
 
-    // Helper function to set console color
+    // function to set console color
     void setColor(int color) {
         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
     }
 
-    // Reset color to default
+    // Reset color to default-white
     void resetColor() {
-        setColor(7); // White
+        setColor(7); 
     }
 
-    // Initialize the game board
+    // Initialize the game
     void initBoard() {
         board.resize(BOARD_HEIGHT, vector<int>(BOARD_WIDTH, 0));
     }
 
-    // Generate a new random piece
+    // Generate  random piece
     void newPiece() {
         pieceType = rand() % 7;
         currentPiece = TETROMINOES[pieceType];
@@ -119,7 +119,7 @@ private:
         currentX = BOARD_WIDTH / 2 - currentPiece[0].size() / 2;
         currentY = 0;
 
-        // Check if game over (new piece can't be placed)
+        //  game over condition (new piece can not be placed)
         if (checkCollision()) {
             gameOver = true;
         }
@@ -146,7 +146,7 @@ private:
         return false;
     }
 
-    // Rotate the current piece 90 degrees clockwise
+    // Rotate  piece 90 degrees clockwise
     void rotatePiece() {
         vector<vector<bool>> rotated(currentPiece[0].size(), vector<bool>(currentPiece.size()));
         for (int y = 0; y < currentPiece.size(); y++) {
@@ -158,7 +158,7 @@ private:
         vector<vector<bool>> oldPiece = currentPiece;
         currentPiece = rotated;
 
-        // If rotation causes collision, revert
+        // If rotation causes collision-convert to old shape
         if (checkCollision()) {
             currentPiece = oldPiece;
         }
@@ -179,7 +179,7 @@ private:
         }
     }
 
-    // Check for completed lines and clear them
+    // Check for completed lines and remove it
     void clearLines() {
         int linesToClear = 0;
         for (int y = BOARD_HEIGHT - 1; y >= 0; y--) {
@@ -192,15 +192,15 @@ private:
             }
 
             if (lineComplete) {
-                // Remove the line
+                // Remove line
                 board.erase(board.begin() + y);
                 board.insert(board.begin(), vector<int>(BOARD_WIDTH, 0));
                 linesToClear++;
-                y++; // Check the same row again (now shifted down)
+                y++; // row shifted down
             }
         }
 
-        // Update score based on lines cleared
+        // Update score 
         if (linesToClear > 0) {
             linesCleared += linesToClear;
             switch (linesToClear) {
@@ -213,24 +213,24 @@ private:
             // Increase level every 10 lines
             level = 1 + linesCleared / 10;
 
-            // Increase speed (cap at 100ms)
+            // Increase speed 
             fallSpeed = max(100, 1000 - (level * 100));
         }
     }
 
-    // Draw the game board and current piece
+    
     void draw() {
         clearScreen();
 
-        // Draw border
-        setColor(15); // Bright white
+        
+        setColor(15); 
         cout << "+";
         for (int x = 0; x < BOARD_WIDTH * BLOCK_SIZE; x++) {
             cout << "-";
         }
         cout << "+\n";
 
-        // Draw board and current piece
+        // Draw board 
         for (int y = 0; y < BOARD_HEIGHT; y++) {
             cout << "|";
             for (int x = 0; x < BOARD_WIDTH; x++) {
@@ -285,7 +285,7 @@ private:
 
 public:
     Tetris() {
-        srand(time(0)); // Seed random number generator
+        srand(time(0)); // random number generator
         initBoard();
         score = 0;
         level = 1;
@@ -301,7 +301,7 @@ public:
         if (_kbhit()) {
             int key = _getch();
 
-            // Handle arrow keys (which come as two key presses)
+            // Handle arrow keys 
             if (key == 224 || key == 0) {
                 key = _getch();
             }
@@ -339,7 +339,7 @@ public:
         }
     }
 
-    // Update game state
+    // Update state
     void update() {
         auto now = chrono::steady_clock::now();
         auto elapsed = chrono::duration_cast<chrono::milliseconds>(now - lastFall).count();
@@ -356,7 +356,7 @@ public:
         }
     }
 
-    // Main game loop
+    // Main game 
     void run() {
         while (!gameOver) {
             draw();
@@ -373,7 +373,7 @@ public:
 };
 
 int main() {
-    // Set console window size
+    
     HWND console = GetConsoleWindow();
     RECT r;
     GetWindowRect(console, &r);
